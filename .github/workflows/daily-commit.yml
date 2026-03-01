@@ -1,0 +1,40 @@
+name: Daily Automated Commit
+
+on:
+  # Scheduled to run daily at 10:30 AM UTC
+  schedule:
+    - cron: '30 10 * * *'
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  daily-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update by 23f3003316@ds.study.iitm.ac.in
+        run: |
+          # Configure git
+          git config --local user.email "23f3003316@ds.study.iitm.ac.in"
+          git config --local user.name "DevSync Automation"
+          
+          # Create or update the status file
+          echo "Last automated update: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > STATUS.md
+          echo "Workflow run number: ${{ github.run_number }}" >> STATUS.md
+          echo "Triggered by: Scheduled daily commit" >> STATUS.md
+          
+          # Stage and commit
+          git add STATUS.md
+          git commit -m "Daily automated commit - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          
+          # Push changes
+          git push
